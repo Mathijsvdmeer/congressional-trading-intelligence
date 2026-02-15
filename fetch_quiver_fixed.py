@@ -114,8 +114,8 @@ def normalize_quiver_data(raw_trades):
                 "disclosure_date": trade.get("Filed"),  # FIXED: Quiver uses "Filed"
                 "ticker": ticker,
                 "trade_type": trade_type,
-                "amount_low": parse_amount(trade.get("Trade_Size_USD"), is_high=False),  # FIXED: "Trade_Size_USD"
-                "amount_high": parse_amount(trade.get("Trade_Size_USD"), is_high=True),  # FIXED: "Trade_Size_USD"
+                "amount_low": parse_amount(trade.get("Range"), is_high=False),  # FIXED: "Range"
+                "amount_high": parse_amount(trade.get("Range"), is_high=True),  # FIXED: "Range"
                 "party": trade.get("Party"),
                 "chamber": trade.get("Chamber"),
                 "company_name": trade.get("Company") or trade.get("Description")

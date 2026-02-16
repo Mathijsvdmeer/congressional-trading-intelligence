@@ -114,8 +114,8 @@ def normalize_quiver_data(raw_trades):
                 "disclosure_date": trade.get("Filed"),  # FIXED: Quiver uses "Filed"
                 "ticker": ticker,
                 "trade_type": trade_type,
-                "amount_low": parse_amount(trade.get("Range"), is_high=False),  # FIXED: "Range"
-                "amount_high": parse_amount(trade.get("Range"), is_high=True),  # FIXED: "Range"
+                "amount_low": parse_amount(trade.get("Trade_Size_USD"), is_high=False),  # Quiver uses "Trade_Size_USD"
+                "amount_high": parse_amount(trade.get("Trade_Size_USD"), is_high=True),  # Quiver uses "Trade_Size_USD"
                 "party": trade.get("Party"),
                 "chamber": trade.get("Chamber"),
                 "company_name": trade.get("Company") or trade.get("Description")
@@ -146,9 +146,9 @@ def parse_amount(amount_str, is_high=False):
 
         if "-" in amount_str:
             parts = amount_str.split("-")
-            return int(parts[1].strip()) if is_high else int(parts[0].strip())
+            return int(float(parts[1].strip())) if is_high else int(float(parts[0].strip()))
         else:
-            return int(amount_str.strip())
+            return int(float(amount_str.strip()))
     except:
         return None
 

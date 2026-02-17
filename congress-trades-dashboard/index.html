@@ -269,6 +269,38 @@
             margin-top: 4px;
         }
 
+        .stake-badge {
+            font-size: 11px;
+            margin-left: 5px;
+            cursor: default;
+            opacity: 0.85;
+        }
+
+        .stake-filter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding-top: 28px; /* align with other filter inputs */
+        }
+
+        .stake-filter input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #667eea;
+            cursor: pointer;
+            border: none;
+            padding: 0;
+        }
+
+        .stake-filter label {
+            cursor: pointer;
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
         .loading {
             text-align: center;
             padding: 40px;
@@ -346,6 +378,10 @@
                     <option value="R">Republican</option>
                 </select>
             </div>
+            <div class="filter-group stake-filter">
+                <input type="checkbox" id="filterStake" onchange="applyFilters()">
+                <label for="filterStake">🇦🇺 Stake/Pearler only</label>
+            </div>
         </div>
 
         <div class="trades-container">
@@ -378,6 +414,25 @@
         let allTrades = [];
         let filteredTrades = [];
         let signalScores = {}; // politician_name (lowercase) → score data
+
+        // Tickers available on Stake/Pearler (Australia) — updated Feb 2026
+        const STAKE_TICKERS = new Set([
+            // Big Tech
+            'AAPL','MSFT','GOOGL','GOOG','AMZN','META','NVDA','AMD','TSLA','NFLX',
+            'INTC','QCOM','CRM','ORCL','CSCO','IBM','ADBE','PYPL','UBER','SHOP',
+            // Finance
+            'JPM','GS','BAC','V','MA','C','WFC','MS','BRK.B','AXP','BLK','SCHW',
+            // Healthcare
+            'JNJ','PFE','MRK','ABBV','UNH','CVS','AMGN','GILD','LLY','ABT',
+            // Energy
+            'XOM','CVX','COP','SLB','OXY',
+            // Consumer & Media
+            'WMT','COST','TGT','MCD','SBUX','KO','PEP','DIS','CMCSA','NKE',
+            // Defense
+            'LMT','RTX','NOC','BA','GD',
+            // Other high-volume congressional trades
+            'PLTR','COIN','SQ','SNAP','SPOT','RBLX'
+        ]);
 
         // Currency state — default AUD for Australian market
         let currentCurrency = localStorage.getItem('currency') || 'AUD';
@@ -527,7 +582,12 @@
                     <td>${formatDate(trade.trade_date)}</td>
                     <td><strong>${trade.member_name}</strong><br><small>${trade.chamber || '-'}</small></td>
                     <td><span class="badge ${partyBadge}">${partyText}</span></td>
-                    <td><strong>${trade.ticker}</strong></td>
+                    <td>
+                        <strong>${trade.ticker}</strong>
+                        ${STAKE_TICKERS.has(trade.ticker)
+                            ? '<span class="stake-badge" title="Available to trade on Stake &amp; Pearler">✅</span>'
+                            : '<span class="stake-badge" title="Not available on Stake/Pearler">❌</span>'}
+                    </td>
                     <td>${trade.company_name || '-'}</td>
                     <td><span class="badge ${tradeTypeBadge}">${trade.trade_type}</span></td>
                     <td class="amount">${amountLow} - ${amountHigh}</td>
@@ -543,14 +603,16 @@
             const searchTicker = document.getElementById('searchTicker').value.toUpperCase();
             const filterTradeType = document.getElementById('filterTradeType').value;
             const filterParty = document.getElementById('filterParty').value;
+            const filterStake = document.getElementById('filterStake').checked;
 
             filteredTrades = allTrades.filter(trade => {
                 const matchesPolitician = !searchPolitician || trade.member_name.toLowerCase().includes(searchPolitician);
                 const matchesTicker = !searchTicker || trade.ticker.includes(searchTicker);
                 const matchesTradeType = !filterTradeType || trade.trade_type === filterTradeType;
                 const matchesParty = !filterParty || trade.party === filterParty;
+                const matchesStake = !filterStake || STAKE_TICKERS.has(trade.ticker);
 
-                return matchesPolitician && matchesTicker && matchesTradeType && matchesParty;
+                return matchesPolitician && matchesTicker && matchesTradeType && matchesParty && matchesStake;
             });
 
             renderTrades();

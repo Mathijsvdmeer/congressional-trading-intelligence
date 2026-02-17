@@ -183,6 +183,46 @@
             color: #667eea;
         }
 
+        .signal__stars {
+            color: #f6c90e;
+            font-size: 15px;
+            letter-spacing: 1px;
+            cursor: default;
+            white-space: nowrap;
+            position: relative;
+            display: inline-block;
+        }
+
+        .signal__stars[data-tooltip]:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2d3748;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 100;
+            pointer-events: none;
+            max-width: 260px;
+            white-space: normal;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .signal__locked {
+            font-size: 14px;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        .signal__locked:hover {
+            opacity: 1;
+        }
+
         .loading {
             text-align: center;
             padding: 40px;
@@ -265,17 +305,55 @@
                         <th onclick="sortTable('company_name')">Company</th>
                         <th onclick="sortTable('trade_type')">Type</th>
                         <th>Amount Range</th>
+                        <th title="Historical pattern analysis based on trade volume and disclosure timing. Factual information only — not financial advice.">Pattern ℹ️</th>
                     </tr>
                 </thead>
                 <tbody id="tradesBody"></tbody>
             </table>
         </div>
+        <p style="text-align:center; color:rgba(255,255,255,0.7); font-size:12px; margin-top:30px; padding: 0 20px;">
+            This is factual information only, not financial advice. Past performance is not indicative of future results.
+            Congressional trade disclosures are public record sourced from the STOCK Act.
+        </p>
     </div>
 
     <script>
         const API_URL = 'https://congress-trader-api-production.up.railway.app';
         let allTrades = [];
         let filteredTrades = [];
+        let signalScores = {}; // politician_name (lowercase) → score data
+
+        async function loadSignalScores() {
+            try {
+                const response = await fetch(`${API_URL}/signal-scores`);
+                if (!response.ok) return;
+                const scores = await response.json();
+                scores.forEach(s => {
+                    signalScores[s.member_name.toLowerCase()] = s;
+                });
+            } catch (e) {
+                // Signal scores are non-critical — fail silently
+            }
+        }
+
+        function renderSignalCell(memberName) {
+            const userTier = localStorage.getItem('user_tier');
+            const isPaid = userTier === 'insider' || userTier === 'elite';
+
+            if (!isPaid) {
+                return `<td><span class="signal__locked" onclick="alert('Upgrade to Insider to unlock Historical Pattern Analysis')" title="Upgrade to see pattern analysis">🔒</span></td>`;
+            }
+
+            const data = signalScores[memberName.toLowerCase()];
+            if (!data) return '<td>-</td>';
+
+            const score = data.signal_score || 1;
+            const stars = '★'.repeat(score) + '☆'.repeat(5 - score);
+            const lag = data.avg_disclosure_lag_days != null ? `${data.avg_disclosure_lag_days} days avg` : 'unknown';
+            const tooltip = `Based on ${data.trade_count} trades. Avg disclosure lag: ${lag}. Factual information only — not financial advice.`;
+
+            return `<td><span class="signal__stars" data-tooltip="${tooltip}">${stars}</span></td>`;
+        }
 
         async function loadStats() {
             try {
@@ -341,6 +419,7 @@
                     <td>${trade.company_name || '-'}</td>
                     <td><span class="badge ${tradeTypeBadge}">${trade.trade_type}</span></td>
                     <td class="amount">${amountLow} - ${amountHigh}</td>
+                    ${renderSignalCell(trade.member_name)}
                 `;
 
                 tbody.appendChild(row);
@@ -390,8 +469,9 @@
         document.getElementById('filterTradeType').addEventListener('change', applyFilters);
         document.getElementById('filterParty').addEventListener('change', applyFilters);
 
-        // Load stats and trades on page load
+        // Load all data on page load (signal scores fetched in parallel)
         loadStats();
+        loadSignalScores();
         loadTrades();
     </script>
 </body>

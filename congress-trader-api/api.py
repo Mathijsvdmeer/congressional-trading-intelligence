@@ -108,6 +108,43 @@ def get_recent_trades(days: int = 30):
         "trades": result.data
     }
 
+@app.get("/signal-scores")
+def get_all_signal_scores():
+    """
+    Historical pattern analysis scores for all politicians.
+    Score (1-5) based on trade volume and disclosure timing patterns.
+    Factual information only — not financial advice.
+    """
+    result = supabase.table("politician_signal_scores")\
+        .select("*")\
+        .order("trade_count", desc=True)\
+        .execute()
+    return result.data
+
+@app.get("/politician/{name}/signal-score")
+def get_politician_signal_score(name: str):
+    """
+    Historical pattern analysis score for a specific politician.
+    Factual information only — not financial advice.
+    """
+    result = supabase.table("politician_signal_scores")\
+        .select("*")\
+        .ilike("member_name", f"%{name}%")\
+        .execute()
+    if not result.data:
+        return {"error": f"No pattern data found for {name}"}
+    row = result.data[0]
+    return {
+        **row,
+        "score_explanation": {
+            "signal_score": row["signal_score"],
+            "basis": "Historical pattern analysis based on trade volume and disclosure timing",
+            "trade_count": row["trade_count"],
+            "avg_disclosure_lag_days": row["avg_disclosure_lag_days"],
+            "disclaimer": "Factual information only. Not financial advice."
+        }
+    }
+
 @app.get("/politician/{name}")
 def get_politician_profile(name: str):
     result = supabase.table("congressional_trades").select("*").ilike("member_name", f"%{name}%").execute()

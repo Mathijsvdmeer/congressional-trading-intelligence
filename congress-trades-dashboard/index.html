@@ -150,6 +150,25 @@
             background: #f7fafc;
         }
 
+        tr.row--purchase {
+            background: rgba(16, 185, 129, 0.04);
+            border-left: 3px solid rgba(16, 185, 129, 0.4);
+        }
+
+        tr.row--sale {
+            background: rgba(239, 68, 68, 0.04);
+            border-left: 3px solid rgba(239, 68, 68, 0.3);
+        }
+
+        tr.row--purchase:hover { background: rgba(16, 185, 129, 0.08); }
+        tr.row--sale:hover { background: rgba(239, 68, 68, 0.06); }
+
+        .trade-age {
+            font-size: 11px;
+            color: #a0aec0;
+            white-space: nowrap;
+        }
+
         .badge {
             display: inline-block;
             padding: 4px 12px;
@@ -397,6 +416,7 @@
                         <th onclick="sortTable('company_name')">Company</th>
                         <th onclick="sortTable('trade_type')">Type</th>
                         <th>Amount Range</th>
+                        <th title="How long ago this trade was made">Age</th>
                         <th title="Historical pattern analysis based on trade volume and disclosure timing. Factual information only — not financial advice.">Pattern ℹ️</th>
                     </tr>
                 </thead>
@@ -575,6 +595,17 @@
                 const partyBadge = trade.party === 'D' ? 'badge-democrat' : 'badge-republican';
                 const partyText = trade.party === 'D' ? 'DEM' : trade.party === 'R' ? 'GOP' : trade.party || '-';
 
+                const isPurchase = trade.trade_type === 'Purchase';
+                row.classList.add(isPurchase ? 'row--purchase' : 'row--sale');
+
+                const daysAgo = trade.trade_date
+                    ? Math.floor((Date.now() - new Date(trade.trade_date + 'T00:00:00')) / 86400000)
+                    : null;
+                const ageLabel = daysAgo === null ? '-'
+                    : daysAgo < 30  ? `<span style="color:#10b981;font-size:11px">Recent</span>`
+                    : daysAgo < 90  ? `<span class="trade-age">Developing</span>`
+                    : `<span class="trade-age">Mature</span>`;
+
                 const amountLow = formatAmount(trade.amount_low);
                 const amountHigh = formatAmount(trade.amount_high);
 
@@ -591,6 +622,7 @@
                     <td>${trade.company_name || '-'}</td>
                     <td><span class="badge ${tradeTypeBadge}">${trade.trade_type}</span></td>
                     <td class="amount">${amountLow} - ${amountHigh}</td>
+                    <td>${ageLabel}</td>
                     ${renderSignalCell(trade.member_name)}
                 `;
 

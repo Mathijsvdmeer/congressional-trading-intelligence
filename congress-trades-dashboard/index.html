@@ -630,24 +630,57 @@
             });
         }
 
+        let politicianSearchTimer = null;
+
         function applyFilters() {
-            const searchPolitician = document.getElementById('searchPolitician').value.toLowerCase();
+            const searchPolitician = document.getElementById('searchPolitician').value.trim();
             const searchTicker = document.getElementById('searchTicker').value.toUpperCase();
             const filterTradeType = document.getElementById('filterTradeType').value;
             const filterParty = document.getElementById('filterParty').value;
             const filterStake = document.getElementById('filterStake').checked;
 
+            // Politician search: hit API directly so we find anyone regardless of recency
+            if (searchPolitician.length >= 2) {
+                clearTimeout(politicianSearchTimer);
+                politicianSearchTimer = setTimeout(() => {
+                    searchPoliticianFromAPI(searchPolitician, searchTicker, filterTradeType, filterParty, filterStake);
+                }, 400);
+                return;
+            }
+
+            // No politician search — filter the loaded recent trades
             filteredTrades = allTrades.filter(trade => {
-                const matchesPolitician = !searchPolitician || trade.member_name.toLowerCase().includes(searchPolitician);
                 const matchesTicker = !searchTicker || trade.ticker.includes(searchTicker);
                 const matchesTradeType = !filterTradeType || trade.trade_type === filterTradeType;
                 const matchesParty = !filterParty || trade.party === filterParty;
                 const matchesStake = !filterStake || STAKE_TICKERS.has(trade.ticker);
-
-                return matchesPolitician && matchesTicker && matchesTradeType && matchesParty && matchesStake;
+                return matchesTicker && matchesTradeType && matchesParty && matchesStake;
             });
 
             renderTrades();
+        }
+
+        async function searchPoliticianFromAPI(name, ticker, tradeType, party, stakeOnly) {
+            const tbody = document.getElementById('tradesBody');
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:#718096;">Searching...</td></tr>';
+
+            try {
+                const res = await fetch(`${API_URL}/politician/${encodeURIComponent(name)}/trades`);
+                if (!res.ok) throw new Error('Not found');
+                const trades = await res.json();
+
+                filteredTrades = trades.filter(trade => {
+                    const matchesTicker = !ticker || trade.ticker.includes(ticker);
+                    const matchesTradeType = !tradeType || trade.trade_type === tradeType;
+                    const matchesParty = !party || trade.party === party;
+                    const matchesStake = !stakeOnly || STAKE_TICKERS.has(trade.ticker);
+                    return matchesTicker && matchesTradeType && matchesParty && matchesStake;
+                });
+
+                renderTrades();
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:#718096;">No trades found for that politician.</td></tr>';
+            }
         }
 
         function sortTable(column) {

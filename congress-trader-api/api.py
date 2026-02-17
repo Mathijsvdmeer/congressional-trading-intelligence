@@ -149,7 +149,7 @@ def get_politician_signal_score(name: str):
 def get_politician_trades(name: str, limit: int = 500):
     """Return all trades for a politician — used for profile charts."""
     result = supabase.table("congressional_trades")\
-        .select("trade_date,ticker,trade_type,amount_low,amount_high,company_name,disclosure_date")\
+        .select("*")\
         .ilike("member_name", f"%{name}%")\
         .order("trade_date", desc=True)\
         .limit(limit)\

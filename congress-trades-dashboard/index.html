@@ -611,7 +611,7 @@
 
                 row.innerHTML = `
                     <td>${formatDate(trade.trade_date)}</td>
-                    <td><strong>${trade.member_name}</strong><br><small>${trade.chamber || '-'}</small></td>
+                    <td><a href="politician.html?name=${encodeURIComponent(trade.member_name)}" style="color:#667eea;text-decoration:none;font-weight:bold;">${trade.member_name}</a><br><small>${trade.chamber || '-'}</small></td>
                     <td><span class="badge ${partyBadge}">${partyText}</span></td>
                     <td>
                         <strong>${trade.ticker}</strong>

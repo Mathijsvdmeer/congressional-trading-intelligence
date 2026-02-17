@@ -145,6 +145,17 @@ def get_politician_signal_score(name: str):
         }
     }
 
+@app.get("/politician/{name}/trades")
+def get_politician_trades(name: str, limit: int = 500):
+    """Return all trades for a politician — used for profile charts."""
+    result = supabase.table("congressional_trades")\
+        .select("trade_date,ticker,trade_type,amount_low,amount_high,company_name,disclosure_date")\
+        .ilike("member_name", f"%{name}%")\
+        .order("trade_date", desc=True)\
+        .limit(limit)\
+        .execute()
+    return result.data
+
 @app.get("/politician/{name}")
 def get_politician_profile(name: str):
     result = supabase.table("congressional_trades").select("*").ilike("member_name", f"%{name}%").execute()

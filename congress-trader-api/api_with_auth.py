@@ -32,7 +32,7 @@ app = FastAPI(
 # Enable CORS for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TODO: Restrict to your domain in production
+    allow_origins=["https://calm-entremet-cf440f.netlify.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -296,7 +296,7 @@ async def get_account(user: Dict = Depends(get_current_user)):
     prefs = supabase.table("user_preferences")\
         .select("*")\
         .eq("user_id", user["id"])\
-        .single()\
+        .maybe_single()\
         .execute()
 
     # Get tier limits
@@ -344,12 +344,13 @@ async def get_watchlist(user: Dict = Depends(get_current_user)):
     prefs = supabase.table("user_preferences")\
         .select("watched_politicians, watched_tickers")\
         .eq("user_id", user["id"])\
-        .single()\
+        .maybe_single()\
         .execute()
 
+    data = prefs.data or {}
     return {
-        "politicians": prefs.data["watched_politicians"] or [],
-        "tickers": prefs.data["watched_tickers"] or []
+        "politicians": data.get("watched_politicians") or [],
+        "tickers": data.get("watched_tickers") or []
     }
 
 @app.post("/watchlist/add")
@@ -365,15 +366,16 @@ async def add_to_watchlist(
     prefs = supabase.table("user_preferences")\
         .select("*")\
         .eq("user_id", user["id"])\
-        .single()\
+        .maybe_single()\
         .execute()
 
     # Check tier limits
     limits = await get_user_limits(user["id"])
     max_politicians = limits["max_watched_politicians"]
 
+    prefs_data = prefs.data or {}
     if item.type == "politician":
-        current_list = prefs.data.get("watched_politicians", [])
+        current_list = prefs_data.get("watched_politicians", [])
 
         # Check limit (unless unlimited)
         if max_politicians != -1 and len(current_list) >= max_politicians:
@@ -390,7 +392,7 @@ async def add_to_watchlist(
                 .execute()
 
     elif item.type == "ticker":
-        current_list = prefs.data.get("watched_tickers", [])
+        current_list = prefs_data.get("watched_tickers", [])
         if item.value.upper() not in current_list:
             current_list.append(item.value.upper())
             supabase.table("user_preferences")\
@@ -531,7 +533,10 @@ async def get_politician_leaderboard(
     Get politician trading leaderboard with advanced analytics
     Requires: Elite subscription
     """
-    result = supabase.table("congressional_trades").select("*").execute()
+    result = supabase.table("congressional_trades")\
+        .select("member_name, party, ticker, sector")\
+        .limit(5000)\
+        .execute()
 
     # Calculate stats per politician
     politician_stats = {}

@@ -58,7 +58,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Security(
         profile_response = supabase.table("user_profiles")\
             .select("*")\
             .eq("id", user.id)\
-            .single()\
+            .maybe_single()\
             .execute()
 
         if not profile_response.data:
@@ -310,11 +310,11 @@ def format_auth_error(tier_required: str, current_tier: str) -> Dict[str, Any]:
                 "features": ["7-day delayed trades", "Basic search"]
             },
             "insider": {
-                "price": "$29 AUD/month",
+                "price": "A$19.99/month",
                 "features": ["Real-time US trades", "Email alerts (5 politicians)", "Sector analytics"]
             },
             "elite": {
-                "price": "$79 AUD/month",
+                "price": "A$49.99/month",
                 "features": ["Everything in Insider", "Australian MP data", "Advanced analytics", "API access"]
             }
         }

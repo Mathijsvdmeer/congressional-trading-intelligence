@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing · Congressional Trading Intelligence</title>
+    <meta name="description"
+        content="Simple, transparent pricing for Australian investors. Track congressional stock trades from $0/month.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            color: #e2e8f0;
+            padding: 0 0 80px;
+        }
+
+        /* ─── NAV ─── */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .nav-brand {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: #fff;
+        }
+
+        .btn-nav {
+            padding: 8px 18px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border-radius: 9px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+
+        .btn-nav:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* ─── HERO ─── */
+        .hero {
+            text-align: center;
+            padding: 64px 20px 40px;
+        }
+
+        .hero-eyebrow {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.15);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            color: #a5b4fc;
+            padding: 5px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: clamp(32px, 5vw, 52px);
+            font-weight: 900;
+            color: #fff;
+            line-height: 1.1;
+            letter-spacing: -1.5px;
+            margin-bottom: 16px;
+        }
+
+        h1 span {
+            background: linear-gradient(135deg, #667eea, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-sub {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 18px;
+            max-width: 520px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+
+        /* ─── BILLING TOGGLE ─── */
+        .billing-toggle {
+            display: inline-flex;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            padding: 4px;
+            gap: 4px;
+            margin-bottom: 56px;
+        }
+
+        .billing-toggle button {
+            padding: 10px 24px;
+            border: none;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.55);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .billing-toggle button.active {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+
+        .save-badge {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* ─── PRICING GRID ─── */
+        .pricing-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            align-items: start;
+        }
+
+        @media (max-width: 1100px) {
+            .pricing-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .tier-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 32px 28px;
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .tier-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .tier-card.featured {
+            background: linear-gradient(160deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+            border-color: rgba(102, 126, 234, 0.4);
+            transform: scale(1.03);
+        }
+
+        .tier-card.featured:hover {
+            transform: scale(1.03) translateY(-4px);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            padding: 5px 18px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .tier-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .tier-price {
+            font-size: 42px;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: -2px;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .tier-price span {
+            font-size: 16px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 0;
+        }
+
+        .annual-note {
+            font-size: 12px;
+            color: #34d399;
+            font-weight: 600;
+            margin-bottom: 6px;
+            min-height: 18px;
+        }
+
+        .tier-desc {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 24px;
+            line-height: 1.5;
+            min-height: 36px;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            margin: 20px 0;
+        }
+
+        .feature-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 28px;
+        }
+
+        .feature-list li {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            line-height: 1.4;
+        }
+
+        .feature-list li .icon {
+            font-size: 12px;
+            margin-top: 1px;
+            flex-shrink: 0;
+        }
+
+        .feature-list li.disabled {
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        /* CTA buttons */
+        .btn-cta {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-cta-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-cta-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 28px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-cta-ghost {
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .btn-cta-ghost:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .btn-cta-outline {
+            background: transparent;
+            color: #a5b4fc;
+            border: 1px solid rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-cta-outline:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .trial-note {
+            text-align: center;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: 10px;
+        }
+
+        /* ─── SOCIAL PROOF ─── */
+        .trust-section {
+            max-width: 860px;
+            margin: 80px auto 0;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        .trust-label {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.25);
+            margin-bottom: 32px;
+        }
+
+        .trust-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .trust-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: left;
+        }
+
+        .trust-stat {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 4px;
+        }
+
+        .trust-desc {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* ─── FAQ ─── */
+        .faq-section {
+            max-width: 680px;
+            margin: 80px auto 0;
+            padding: 0 20px;
+        }
+
+        .faq-section h2 {
+            font-size: 28px;
+            font-weight: 800;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .faq-item {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .faq-q {
+            width: 100%;
+            background: none;
+            border: none;
+            padding: 18px 20px;
+            text-align: left;
+            color: rgba(255, 255, 255, 0.85);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            transition: color 0.2s;
+        }
+
+        .faq-q:hover {
+            color: #fff;
+        }
+
+        .faq-q .arrow {
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+
+        .faq-item.open .faq-q .arrow {
+            transform: rotate(180deg);
+        }
+
+        .faq-a {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+            line-height: 1.7;
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+
+        .faq-item.open .faq-a {
+            max-height: 300px;
+            padding: 0 20px 18px;
+        }
+
+        /* ─── FOOTER ─── */
+        .footer {
+            text-align: center;
+            margin-top: 80px;
+            padding: 0 20px;
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 11px;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAV -->
+    <nav>
+        <a href="index.html" class="nav-brand">📊 Congressional Trading Intelligence</a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">Dashboard</a>
+            <a href="auth.html" class="btn-nav" id="authNavBtn">Login / Sign Up</a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <div class="hero">
+        <div class="hero-eyebrow">Simple Pricing</div>
+        <h1>Copy Congress.<br><span>Beat the Market.</span></h1>
+        <p class="hero-sub">Real-time congressional trade data for Australian investors. Cancel anytime, no lock-ins.
+        </p>
+
+        <!-- Billing Toggle -->
+        <div class="billing-toggle">
+            <button class="active" id="btnMonthly" onclick="setBilling('monthly')">Monthly</button>
+            <button id="btnAnnual" onclick="setBilling('annual')">Annual <span class="save-badge">Save
+                    17%</span></button>
+        </div>
+    </div>
+
+    <!-- PRICING GRID -->
+    <div class="pricing-section">
+        <div class="pricing-grid">
+
+            <!-- FREE -->
+            <div class="tier-card">
+                <div class="tier-name">Free</div>
+                <div class="tier-price">A$0<span>/mo</span></div>
+                <div class="annual-note">&nbsp;</div>
+                <div class="tier-desc">Get started. See the most impactful trades for free.</div>
+                <hr class="divider">
+                <ul class="feature-list">
+                    <li><span class="icon">✓</span> 10 highest-impact trades</li>
+                    <li><span class="icon">✓</span> Basic filters (ticker, party)</li>
+                    <li><span class="icon">✓</span> AUD / USD toggle</li>
+                    <li class="disabled"><span class="icon">✗</span> Signal Score hidden (🔒)</li>
+                    <li class="disabled"><span class="icon">✗</span> No email alerts</li>
+                    <li class="disabled"><span class="icon">✗</span> No full history</li>
+                </ul>
+                <a href="index.html" class="btn-cta btn-cta-ghost">Start for Free</a>
+            </div>
+
+            <!-- INSIDER (featured) -->
+            <div class="tier-card featured">
+                <div class="popular-badge">⭐ Most Popular</div>
+                <div class="tier-name">Insider</div>
+                <div class="tier-price" id="insiderPrice">A$19.99<span>/mo</span></div>
+                <div class="annual-note" id="insiderAnnualNote">&nbsp;</div>
+                <div class="tier-desc">Everything you need to track the smart money.</div>
+                <hr class="divider">
+                <ul class="feature-list">
+                    <li><span class="icon">✓</span> <strong>109,000+ trades</strong> (2012–present)</li>
+                    <li><span class="icon">✓</span> Real-time data, no delay</li>
+                    <li><span class="icon">✓</span> Signal Score ⭐⭐⭐⭐⭐</li>
+                    <li><span class="icon">✓</span> Email alerts (up to 5 politicians)</li>
+                    <li><span class="icon">✓</span> Amount filter up to $1M+</li>
+                    <li><span class="icon">✓</span> CSV export</li>
+                    <li class="disabled"><span class="icon">✗</span> Unlimited alerts</li>
+                    <li class="disabled"><span class="icon">✗</span> Australian MP data</li>
+                </ul>
+                <a href="auth.html?plan=insider" class="btn-cta btn-cta-primary" id="insiderCTA">Start 7-Day Free
+                    Trial</a>
+                <p class="trial-note" id="insiderTrialNote">7-day free trial, then A$19.99/month</p>
+            </div>
+
+            <!-- ELITE -->
+            <div class="tier-card">
+                <div class="tier-name">Elite</div>
+                <div class="tier-price" id="elitePrice">A$49<span>/mo</span></div>
+                <div class="annual-note" id="eliteAnnualNote">&nbsp;</div>
+                <div class="tier-desc">For serious investors who want every edge.</div>
+                <hr class="divider">
+                <ul class="feature-list">
+                    <li><span class="icon">✓</span> Everything in Insider</li>
+                    <li><span class="icon">✓</span> <strong>Unlimited</strong> email alerts</li>
+                    <li><span class="icon">✓</span> Australian MP disclosures 🇦🇺</li>
+                    <li><span class="icon">✓</span> Politician leaderboard</li>
+                    <li><span class="icon">✓</span> Sector rotation tracker</li>
+                    <li><span class="icon">✓</span> SMS notifications (coming soon)</li>
+                    <li><span class="icon">✓</span> Priority support</li>
+                </ul>
+                <a href="auth.html?plan=elite" class="btn-cta btn-cta-primary" id="eliteCTA">Start 7-Day Free Trial</a>
+                <p class="trial-note" id="eliteTrialNote">7-day free trial, then A$49/month</p>
+            </div>
+
+            <!-- API / ENTERPRISE -->
+            <div class="tier-card">
+                <div class="tier-name">API Access</div>
+                <div class="tier-price">Custom</div>
+                <div class="annual-note">&nbsp;</div>
+                <div class="tier-desc">Programmatic access for quant traders and developers.</div>
+                <hr class="divider">
+                <ul class="feature-list">
+                    <li><span class="icon">✓</span> REST API (1,000 req/hour)</li>
+                    <li><span class="icon">✓</span> Point-in-time data</li>
+                    <li><span class="icon">✓</span> Full trade history bulk export</li>
+                    <li><span class="icon">✓</span> White-label embeds</li>
+                    <li><span class="icon">✓</span> SLA guarantee</li>
+                    <li><span class="icon">✓</span> Dedicated support</li>
+                </ul>
+                <a href="mailto:hello@congresstracker.com.au?subject=API%20Access%20Enquiry"
+                    class="btn-cta btn-cta-outline">Contact Sales</a>
+                <p class="trial-note">We'll respond within 1 business day</p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- TRUST / STATS -->
+    <div class="trust-section">
+        <p class="trust-label">By the numbers</p>
+        <div class="trust-grid">
+            <div class="trust-card">
+                <div class="trust-stat">109K+</div>
+                <div class="trust-desc">Congressional trades tracked since 2012</div>
+            </div>
+            <div class="trust-card">
+                <div class="trust-stat">538</div>
+                <div class="trust-desc">Politicians monitored across House &amp; Senate</div>
+            </div>
+            <div class="trust-card">
+                <div class="trust-stat">Daily</div>
+                <div class="trust-desc">Automated data refresh every morning at 6 AM EST</div>
+            </div>
+            <div class="trust-card">
+                <div class="trust-stat">A$19.99</div>
+                <div class="trust-desc">vs. Wolf of Washington at A$830+/year</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="faq-section">
+        <h2>Frequently Asked Questions</h2>
+
+        <div class="faq-item">
+            <button class="faq-q" onclick="toggleFAQ(this)">
+                Is this legal? Is it financial advice?
+                <span class="arrow">▼</span>
+            </button>
+            <div class="faq-a">
+                Congressional trade disclosures are public record under the STOCK Act. We aggregate and present this
+                factual information as a research tool. This is NOT financial advice. We do not recommend buying or
+                selling any security. Always consult a licensed financial adviser before making investment decisions.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-q" onclick="toggleFAQ(this)">
+                Can I cancel anytime?
+                <span class="arrow">▼</span>
+            </button>
+            <div class="faq-a">
+                Yes — cancel with one click from your account page, no questions asked. If you cancel within 30 days of
+                your first charge, we'll refund you in full.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-q" onclick="toggleFAQ(this)">
+                How current is the data?
+                <span class="arrow">▼</span>
+            </button>
+            <div class="faq-a">
+                Data is refreshed every day at 6 AM EST from the official congressional disclosure system via Quiver
+                Quantitative. Insider and Elite subscribers always see the latest available data. Free users see data
+                with a 7-day delay.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-q" onclick="toggleFAQ(this)">
+                What's the Signal Score?
+                <span class="arrow">▼</span>
+            </button>
+            <div class="faq-a">
+                The Signal Score (⭐ 1–5) is a factual pattern analysis based on how frequently a politician trades,
+                their average disclosure lag, and trade volume. A higher score means the politician has a strong
+                historical trading pattern—not a recommendation to copy their trades. It's a research tool, not
+                financial advice.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-q" onclick="toggleFAQ(this)">
+                Do you cover Australian politicians?
+                <span class="arrow">▼</span>
+            </button>
+            <div class="faq-a">
+                Australian MP financial disclosures are available to Elite subscribers. We scrape the official APH
+                Register of Members' Interests and parse it with AI. This is our unique moat — no competitor offers
+                this.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-q" onclick="toggleFAQ(this)">
+                What payment methods do you accept?
+                <span class="arrow">▼</span>
+            </button>
+            <div class="faq-a">
+                We accept all major credit and debit cards (Visa, Mastercard, Amex) via Stripe. Payments are processed
+                in AUD. All card details are handled directly by Stripe — we never see your card number.
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <p>Congressional Trading Intelligence · For Australian Retail Investors</p>
+        <p>This platform provides factual information about disclosed financial interests. This is NOT financial advice.
+        </p>
+        <p>Data sourced from the STOCK Act disclosure system via Quiver Quantitative. We do not recommend buying or
+            selling any securities.</p>
+        <p style="margin-top:12px;">
+            <a href="index.html" style="color:rgba(255,255,255,0.3);text-decoration:none;margin:0 8px;">Dashboard</a> ·
+            <a href="auth.html" style="color:rgba(255,255,255,0.3);text-decoration:none;margin:0 8px;">Login</a> ·
+            <a href="mailto:hello@congresstracker.com.au"
+                style="color:rgba(255,255,255,0.3);text-decoration:none;margin:0 8px;">Contact</a>
+        </p>
+    </div>
+
+    <script>
+        let billing = 'monthly';
+
+        const prices = {
+            insider: { monthly: 'A$19.99', annual: 'A$16.59', annualTotal: 'A$199' },
+            elite: { monthly: 'A$49', annual: 'A$40.75', annualTotal: 'A$499' }
+        };
+
+        function setBilling(mode) {
+            billing = mode;
+            document.getElementById('btnMonthly').classList.toggle('active', mode === 'monthly');
+            document.getElementById('btnAnnual').classList.toggle('active', mode === 'annual');
+
+            if (mode === 'annual') {
+                document.getElementById('insiderPrice').innerHTML = `${prices.insider.annual}<span>/mo</span>`;
+                document.getElementById('insiderAnnualNote').textContent = `${prices.insider.annualTotal}/year · save A$40`;
+                document.getElementById('insiderTrialNote').textContent = `7-day free trial, then ${prices.insider.annualTotal}/year`;
+                document.getElementById('elitePrice').innerHTML = `${prices.elite.annual}<span>/mo</span>`;
+                document.getElementById('eliteAnnualNote').textContent = `${prices.elite.annualTotal}/year · save A$89`;
+                document.getElementById('eliteTrialNote').textContent = `7-day free trial, then ${prices.elite.annualTotal}/year`;
+            } else {
+                document.getElementById('insiderPrice').innerHTML = `${prices.insider.monthly}<span>/mo</span>`;
+                document.getElementById('insiderAnnualNote').textContent = '\u00a0';
+                document.getElementById('insiderTrialNote').textContent = `7-day free trial, then ${prices.insider.monthly}/month`;
+                document.getElementById('elitePrice').innerHTML = `${prices.elite.monthly}<span>/mo</span>`;
+                document.getElementById('eliteAnnualNote').textContent = '\u00a0';
+                document.getElementById('eliteTrialNote').textContent = `7-day free trial, then ${prices.elite.monthly}/month`;
+            }
+        }
+
+        function toggleFAQ(btn) {
+            const item = btn.closest('.faq-item');
+            const isOpen = item.classList.contains('open');
+            // Close all
+            document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+            if (!isOpen) item.classList.add('open');
+        }
+
+        // Update nav auth button
+        (function () {
+            const email = localStorage.getItem('user_email');
+            if (email) {
+                const btn = document.getElementById('authNavBtn');
+                btn.textContent = '👤 My Account';
+            }
+        })();
+    </script>
+</body>
+
+</html>

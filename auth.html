@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Congressional Trading Intelligence</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            max-width: 1000px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .info-panel {
+                display: none;
+            }
+        }
+
+        .info-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .info-panel h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .info-panel p {
+            font-size: 16px;
+            line-height: 1.6;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .feature::before {
+            content: "✓";
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-weight: bold;
+        }
+
+        .auth-panel {
+            padding: 60px 40px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #999;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .form-container {
+            display: none;
+        }
+
+        .form-container.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e0e0e0;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            position: relative;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .social-btn {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+
+        .social-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-top: 10px;
+        }
+
+        .forgot-password a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .disclaimer {
+            margin-top: 30px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .disclaimer strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Info Panel -->
+        <div class="info-panel">
+            <h1>Beat the Market by Copying Congress</h1>
+            <p>Track over 109,000+ congressional stock trades and get alerted when politicians make moves.</p>
+
+            <div class="feature">Real-time trade alerts</div>
+            <div class="feature">Advanced analytics dashboard</div>
+            <div class="feature">Australian MP data (exclusive)</div>
+            <div class="feature">Email & SMS notifications</div>
+            <div class="feature">API access for automation</div>
+
+            <div style="margin-top: 40px; opacity: 0.7; font-size: 14px;">
+                <strong>109,847+</strong> Trades Tracked<br>
+                <strong>538</strong> Politicians Monitored<br>
+                <strong>Daily</strong> Automated Updates
+            </div>
+        </div>
+
+        <!-- Authentication Panel -->
+        <div class="auth-panel">
+            <div class="auth-tabs">
+                <button class="tab active" onclick="switchTab('login')">Log In</button>
+                <button class="tab" onclick="switchTab('signup')">Sign Up</button>
+            </div>
+
+            <!-- Alert Messages -->
+            <div id="alert-container"></div>
+
+            <!-- Login Form -->
+            <div id="login-form" class="form-container active">
+                <form onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" required placeholder="your@email.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required placeholder="••••••••">
+                    </div>
+
+                    <div class="forgot-password">
+                        <a href="#" onclick="handleForgotPassword()">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="btn" id="login-btn">Log In</button>
+                </form>
+
+                <div class="divider"><span>OR</span></div>
+
+                <button class="social-btn" onclick="loginWithGoogle()">
+                    <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><path d="M17.6 9.2l-.1-1.8H9v3.4h4.8C13.6 12 13 13 12 13.6v2.2h3a8.8 8.8 0 0 0 2.6-6.6z" fill="#4285F4" fill-rule="nonzero"/><path d="M9 18c2.4 0 4.5-.8 6-2.2l-3-2.2a5.4 5.4 0 0 1-8-2.9H1V13a9 9 0 0 0 8 5z" fill="#34A853" fill-rule="nonzero"/><path d="M4 10.7a5.4 5.4 0 0 1 0-3.4V5H1a9 9 0 0 0 0 8l3-2.3z" fill="#FBBC05" fill-rule="nonzero"/><path d="M9 3.6c1.3 0 2.5.4 3.4 1.3L15 2.3A9 9 0 0 0 1 5l3 2.4a5.4 5.4 0 0 1 5-3.7z" fill="#EA4335" fill-rule="nonzero"/></g></svg>
+                    Continue with Google
+                </button>
+            </div>
+
+            <!-- Signup Form -->
+            <div id="signup-form" class="form-container">
+                <form onsubmit="handleSignup(event)">
+                    <div class="form-group">
+                        <label for="signup-email">Email</label>
+                        <input type="email" id="signup-email" required placeholder="your@email.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signup-password">Password</label>
+                        <input type="password" id="signup-password" required minlength="8" placeholder="At least 8 characters">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signup-confirm">Confirm Password</label>
+                        <input type="password" id="signup-confirm" required placeholder="Re-enter password">
+                    </div>
+
+                    <button type="submit" class="btn" id="signup-btn">Create Account</button>
+                </form>
+
+                <div class="divider"><span>OR</span></div>
+
+                <button class="social-btn" onclick="loginWithGoogle()">
+                    <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><path d="M17.6 9.2l-.1-1.8H9v3.4h4.8C13.6 12 13 13 12 13.6v2.2h3a8.8 8.8 0 0 0 2.6-6.6z" fill="#4285F4" fill-rule="nonzero"/><path d="M9 18c2.4 0 4.5-.8 6-2.2l-3-2.2a5.4 5.4 0 0 1-8-2.9H1V13a9 9 0 0 0 8 5z" fill="#34A853" fill-rule="nonzero"/><path d="M4 10.7a5.4 5.4 0 0 1 0-3.4V5H1a9 9 0 0 0 0 8l3-2.3z" fill="#FBBC05" fill-rule="nonzero"/><path d="M9 3.6c1.3 0 2.5.4 3.4 1.3L15 2.3A9 9 0 0 0 1 5l3 2.4a5.4 5.4 0 0 1 5-3.7z" fill="#EA4335" fill-rule="nonzero"/></g></svg>
+                    Continue with Google
+                </button>
+
+                <div class="disclaimer">
+                    <strong>⚠️ ASIC Disclaimer:</strong>
+                    This platform provides factual information about disclosed financial interests and trades. This is NOT financial advice. We do not recommend buying or selling any securities. Past trades by politicians do not predict future performance. Consult a licensed financial advisor before making investment decisions.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================
+        // SUPABASE CONFIGURATION
+        // =====================================================
+        // TODO: Replace with your actual Supabase credentials
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE'
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE'
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+        // =====================================================
+        // TAB SWITCHING
+        // =====================================================
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+            event.target.classList.add('active')
+
+            // Show/hide forms
+            document.getElementById('login-form').classList.remove('active')
+            document.getElementById('signup-form').classList.remove('active')
+            document.getElementById(`${tab}-form`).classList.add('active')
+
+            // Clear alerts
+            document.getElementById('alert-container').innerHTML = ''
+        }
+
+        // =====================================================
+        // ALERT MESSAGES
+        // =====================================================
+        function showAlert(message, type = 'info') {
+            const container = document.getElementById('alert-container')
+            container.innerHTML = `<div class="alert alert-${type}">${message}</div>`
+
+            // Auto-dismiss success messages
+            if (type === 'success') {
+                setTimeout(() => container.innerHTML = '', 5000)
+            }
+        }
+
+        // =====================================================
+        // LOGIN
+        // =====================================================
+        async function handleLogin(event) {
+            event.preventDefault()
+
+            const email = document.getElementById('login-email').value
+            const password = document.getElementById('login-password').value
+            const btn = document.getElementById('login-btn')
+
+            btn.disabled = true
+            btn.textContent = 'Logging in...'
+
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password,
+                })
+
+                if (error) throw error
+
+                showAlert('Login successful! Redirecting...', 'success')
+
+                // Redirect to dashboard after 1 second
+                setTimeout(() => {
+                    window.location.href = '/dashboard.html'
+                }, 1000)
+
+            } catch (error) {
+                showAlert(error.message, 'error')
+                btn.disabled = false
+                btn.textContent = 'Log In'
+            }
+        }
+
+        // =====================================================
+        // SIGNUP
+        // =====================================================
+        async function handleSignup(event) {
+            event.preventDefault()
+
+            const email = document.getElementById('signup-email').value
+            const password = document.getElementById('signup-password').value
+            const confirm = document.getElementById('signup-confirm').value
+            const btn = document.getElementById('signup-btn')
+
+            // Validate passwords match
+            if (password !== confirm) {
+                showAlert('Passwords do not match', 'error')
+                return
+            }
+
+            btn.disabled = true
+            btn.textContent = 'Creating account...'
+
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        emailRedirectTo: window.location.origin + '/dashboard.html'
+                    }
+                })
+
+                if (error) throw error
+
+                showAlert('Account created! Please check your email to verify your account.', 'success')
+
+                // Clear form
+                document.getElementById('signup-email').value = ''
+                document.getElementById('signup-password').value = ''
+                document.getElementById('signup-confirm').value = ''
+
+            } catch (error) {
+                showAlert(error.message, 'error')
+            } finally {
+                btn.disabled = false
+                btn.textContent = 'Create Account'
+            }
+        }
+
+        // =====================================================
+        // GOOGLE OAUTH
+        // =====================================================
+        async function loginWithGoogle() {
+            try {
+                const { data, error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: window.location.origin + '/dashboard.html'
+                    }
+                })
+
+                if (error) throw error
+            } catch (error) {
+                showAlert(error.message, 'error')
+            }
+        }
+
+        // =====================================================
+        // FORGOT PASSWORD
+        // =====================================================
+        async function handleForgotPassword() {
+            const email = prompt('Enter your email address:')
+
+            if (!email) return
+
+            try {
+                const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: window.location.origin + '/reset-password.html'
+                })
+
+                if (error) throw error
+
+                showAlert('Password reset email sent! Check your inbox.', 'success')
+            } catch (error) {
+                showAlert(error.message, 'error')
+            }
+        }
+
+        // =====================================================
+        // CHECK IF ALREADY LOGGED IN
+        // =====================================================
+        async function checkExistingSession() {
+            const { data: { session } } = await supabase.auth.getSession()
+
+            if (session) {
+                // User is already logged in - redirect to dashboard
+                window.location.href = '/dashboard.html'
+            }
+        }
+
+        // Run on page load
+        checkExistingSession()
+    </script>
+</body>
+</html>

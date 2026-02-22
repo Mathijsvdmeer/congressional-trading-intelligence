@@ -22,6 +22,7 @@ supabase = create_client(
 
 # Security scheme for Bearer tokens
 security = HTTPBearer()
+optional_security = HTTPBearer(auto_error=False)
 
 class AuthenticationError(HTTPException):
     """Custom exception for authentication failures"""
@@ -97,7 +98,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Security(
         print(f"Auth error: {str(e)}")
         raise AuthenticationError("Authentication failed")
 
-async def get_optional_user(credentials: Optional[HTTPAuthorizationCredentials] = Security(security, auto_error=False)) -> Optional[Dict[str, Any]]:
+async def get_optional_user(credentials: Optional[HTTPAuthorizationCredentials] = Security(optional_security)) -> Optional[Dict[str, Any]]:
     """
     Optional authentication - doesn't require login but returns user if authenticated
     Useful for endpoints that have different behavior for logged-in users

@@ -5,237 +5,331 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Politician Profile — Congressional Trading Intelligence</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
             min-height: 100vh;
             padding: 20px;
+            color: #e2e8f0;
         }
 
         .container { max-width: 1200px; margin: 0 auto; }
+
+        /* ─── NAV ─── */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.07);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 16px 24px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+        }
+        .nav-brand { font-size: 16px; font-weight: 800; color: #fff; text-decoration: none; }
+        .nav-links { display: flex; gap: 12px; align-items: center; }
+        .nav-link {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .nav-link:hover { color: #fff; }
+        .btn-nav {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border-radius: 9px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+        }
 
         .back-link {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            color: rgba(255,255,255,0.85);
+            color: rgba(255,255,255,0.6);
             text-decoration: none;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             transition: color 0.2s;
         }
-        .back-link:hover { color: white; }
+        .back-link:hover { color: #fff; }
 
-        /* Profile card */
+        /* ─── GLASS CARD ─── */
+        .glass {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+        }
+
+        /* ─── PROFILE CARD ─── */
         .profile-card {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            margin-bottom: 25px;
+            padding: 28px 30px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            gap: 25px;
+            gap: 24px;
             flex-wrap: wrap;
         }
 
         .profile-avatar {
-            width: 80px;
-            height: 80px;
+            width: 76px;
+            height: 76px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
-            font-weight: 700;
+            font-size: 26px;
+            font-weight: 800;
             color: white;
             flex-shrink: 0;
         }
-        .profile-avatar--dem { background: linear-gradient(135deg, #4299e1, #2b6cb0); }
-        .profile-avatar--rep { background: linear-gradient(135deg, #fc8181, #c53030); }
-        .profile-avatar--ind { background: linear-gradient(135deg, #68d391, #276749); }
+        .profile-avatar--dem { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .profile-avatar--rep { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+        .profile-avatar--ind { background: linear-gradient(135deg, #10b981, #065f46); }
 
         .profile-info { flex: 1; min-width: 200px; }
-        .profile-info h1 { color: #2d3748; font-size: 26px; margin-bottom: 8px; }
+        .profile-info h1 { color: #fff; font-size: 24px; font-weight: 800; margin-bottom: 8px; }
 
         .profile-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
 
         .badge {
             display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
         }
-        .badge-dem { background: #bee3f8; color: #2c5282; }
-        .badge-rep { background: #fed7d7; color: #742a2a; }
-        .badge-ind { background: #c6f6d5; color: #22543d; }
-        .badge-chamber { background: #e9d8fd; color: #553c9a; }
-        .badge-purchase { background: #c6f6d5; color: #22543d; }
-        .badge-sale { background: #fed7d7; color: #742a2a; }
+        .badge-dem { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.25); }
+        .badge-rep { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+        .badge-ind { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.25); }
+        .badge-chamber { background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.25); }
+        .badge-purchase { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+        .badge-sale { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+
+        .profile-state { font-size: 13px; color: rgba(255,255,255,0.4); }
 
         .profile-signal { margin-left: auto; text-align: center; }
-        .profile-signal .stars { font-size: 22px; color: #f6c90e; letter-spacing: 2px; }
-        .profile-signal .stars-label { font-size: 11px; color: #a0aec0; margin-top: 3px; }
-        .profile-signal .locked { font-size: 22px; cursor: pointer; }
+        .profile-signal .stars { font-size: 22px; color: #f59e0b; letter-spacing: 2px; }
+        .profile-signal .stars-label { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 4px; }
+        .profile-signal .locked { font-size: 22px; cursor: pointer; opacity: 0.6; transition: opacity 0.2s; }
+        .profile-signal .locked:hover { opacity: 1; }
 
-        /* Stats row */
+        /* ─── STATS GRID ─── */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
         }
-
         .stat-card {
-            background: white;
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            border-radius: 14px;
             text-align: center;
         }
         .stat-card__value {
             font-size: 28px;
-            font-weight: 700;
-            color: #667eea;
-            margin-bottom: 4px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 6px;
         }
         .stat-card__label {
-            font-size: 12px;
-            color: #718096;
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
+            font-weight: 700;
         }
 
-        /* Tabs */
-        .tabs-container {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
+        /* ─── TICKERS ─── */
+        .tickers-section {
+            padding: 20px 24px;
+            margin-bottom: 20px;
+        }
+        .tickers-section h3 {
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .ticker-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+        .ticker-chip {
+            background: rgba(255,255,255,0.07);
+            color: rgba(255,255,255,0.7);
+            border: 1px solid rgba(255,255,255,0.12);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .ticker-chip--stake {
+            background: rgba(16,185,129,0.1);
+            color: #34d399;
+            border-color: rgba(16,185,129,0.25);
         }
 
+        /* ─── TABS ─── */
+        .tabs-container { overflow: hidden; }
         .tabs-nav {
             display: flex;
-            border-bottom: 2px solid #e2e8f0;
-            background: #f7fafc;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
         }
-
         .tab-btn {
-            padding: 15px 25px;
-            font-size: 14px;
+            padding: 14px 22px;
+            font-size: 13px;
             font-weight: 600;
-            color: #718096;
+            color: rgba(255,255,255,0.45);
             background: none;
             border: none;
             cursor: pointer;
-            border-bottom: 3px solid transparent;
-            margin-bottom: -2px;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
             transition: all 0.2s;
+            font-family: inherit;
         }
-        .tab-btn:hover { color: #667eea; }
-        .tab-btn--active {
-            color: #667eea;
-            border-bottom-color: #667eea;
-            background: white;
-        }
+        .tab-btn:hover { color: rgba(255,255,255,0.8); }
+        .tab-btn--active { color: #a5b4fc; border-bottom-color: #667eea; }
 
-        .tab-panel { display: none; padding: 25px; }
+        .tab-panel { display: none; padding: 24px; }
         .tab-panel--active { display: block; }
 
-        /* Trades table */
+        /* ─── TABLE ─── */
         table { width: 100%; border-collapse: collapse; }
-        thead { background: #f7fafc; }
+        thead { background: rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.08); }
         th {
-            padding: 12px 15px;
+            padding: 11px 14px;
             text-align: left;
-            color: #4a5568;
-            font-size: 12px;
-            font-weight: 600;
+            color: rgba(255,255,255,0.4);
+            font-size: 11px;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.7px;
+            white-space: nowrap;
         }
         td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #e2e8f0;
-            color: #2d3748;
-            font-size: 14px;
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: #cbd5e1;
+            font-size: 13px;
         }
         tr:last-child td { border-bottom: none; }
-        tr.row--purchase { background: rgba(16,185,129,0.04); border-left: 3px solid rgba(16,185,129,0.4); }
-        tr.row--sale { background: rgba(239,68,68,0.04); border-left: 3px solid rgba(239,68,68,0.3); }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+        tr.row--purchase td:first-child { border-left: 3px solid rgba(16,185,129,0.5); }
+        tr.row--sale td:first-child { border-left: 3px solid rgba(239,68,68,0.5); }
 
-        .amount { font-weight: 600; color: #667eea; }
+        .amount { font-weight: 600; color: #a5b4fc; }
+        .lag-text { font-size: 11px; color: rgba(255,255,255,0.3); }
 
-        /* Ticker chips */
-        .tickers-section {
-            background: white;
-            border-radius: 15px;
-            padding: 20px 25px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            margin-bottom: 25px;
-        }
-        .tickers-section h3 { color: #4a5568; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
-        .ticker-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-        .ticker-chip {
-            background: #edf2f7;
-            color: #4a5568;
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-        .ticker-chip--stake { background: #c6f6d5; color: #22543d; }
-
-        /* Chart container */
+        /* ─── CHART ─── */
         .chart-wrapper { position: relative; height: 320px; }
 
-        .loading { text-align: center; padding: 60px; color: #718096; }
-        .error { background: #fed7d7; color: #742a2a; padding: 20px; border-radius: 8px; }
+        /* ─── LOADING / ERROR ─── */
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: rgba(255,255,255,0.4);
+            font-size: 14px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+        }
+        .loading::before {
+            content: '';
+            display: block;
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(102,126,234,0.3);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 14px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .stake-badge { font-size: 11px; margin-left: 4px; }
+        .error-msg {
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.3);
+            color: #fca5a5;
+            padding: 20px 24px;
+            border-radius: 12px;
+        }
+
+        .stake-badge { font-size: 11px; margin-left: 3px; }
+
+        .footer-disclaimer {
+            text-align: center;
+            color: rgba(255,255,255,0.25);
+            font-size: 11px;
+            margin-top: 24px;
+            line-height: 1.6;
+        }
 
         @media (max-width: 600px) {
-            .profile-card { flex-direction: column; text-align: center; }
-            .profile-badges { justify-content: center; }
-            .profile-signal { margin: 0 auto; }
+            .profile-card { flex-direction: column; }
+            .profile-signal { margin: 0; }
+            nav { padding: 14px 16px; }
+            .nav-links .nav-link { display: none; }
         }
     </style>
 </head>
 <body>
 <div class="container">
 
+    <!-- ═══ NAV ═══ -->
+    <nav>
+        <a href="index.html" class="nav-brand">📊 Congressional Trading Intelligence</a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">Dashboard</a>
+            <a href="pricing.html" class="nav-link">Pricing</a>
+            <a href="auth.html" class="btn-nav" id="authNavBtn">Login / Sign Up</a>
+        </div>
+    </nav>
+
     <a href="index.html" class="back-link">← Back to Dashboard</a>
 
-    <div id="loading" class="loading" style="background:white;border-radius:15px;">Loading profile...</div>
-    <div id="error" class="error" style="display:none;"></div>
+    <div id="loading" class="loading">Loading profile…</div>
+    <div id="errorMsg" class="error-msg" style="display:none;"></div>
 
-    <!-- Profile card — hidden until loaded -->
-    <div id="profileCard" class="profile-card" style="display:none;">
+    <!-- Profile card -->
+    <div id="profileCard" class="glass profile-card" style="display:none;">
         <div id="avatar" class="profile-avatar"></div>
         <div class="profile-info">
-            <h1 id="profileName">-</h1>
+            <h1 id="profileName">—</h1>
             <div class="profile-badges" id="profileBadges"></div>
-            <div style="font-size:13px;color:#718096;" id="profileState"></div>
+            <div class="profile-state" id="profileState"></div>
         </div>
         <div class="profile-signal" id="profileSignal"></div>
     </div>
 
     <div id="statsGrid" class="stats-grid" style="display:none;"></div>
 
-    <div id="tickersSection" class="tickers-section" style="display:none;">
+    <div id="tickersSection" class="glass tickers-section" style="display:none;">
         <h3>Most Traded Stocks</h3>
         <div class="ticker-chips" id="tickerChips"></div>
     </div>
 
-    <div id="tabsContainer" class="tabs-container" style="display:none;">
+    <div id="tabsContainer" class="glass tabs-container" style="display:none;">
         <div class="tabs-nav">
-            <button class="tab-btn tab-btn--active" onclick="switchTab('trades')">Recent Trades</button>
-            <button class="tab-btn" onclick="switchTab('chart')">Activity Chart</button>
+            <button class="tab-btn tab-btn--active" onclick="switchTab('trades', event)">Recent Trades</button>
+            <button class="tab-btn" onclick="switchTab('chart', event)">Activity Chart</button>
         </div>
 
         <div id="tab-trades" class="tab-panel tab-panel--active">
@@ -247,7 +341,7 @@
                         <th>Company</th>
                         <th>Type</th>
                         <th>Amount</th>
-                        <th>Disclosed</th>
+                        <th>Lag</th>
                     </tr>
                 </thead>
                 <tbody id="tradesBody"></tbody>
@@ -261,17 +355,15 @@
         </div>
     </div>
 
-    <p style="text-align:center;color:rgba(255,255,255,0.7);font-size:12px;margin-top:25px;padding:0 20px;">
-        This is factual information only, not financial advice. Past performance is not indicative of future results.
+    <p class="footer-disclaimer">
+        This is factual information only, not financial advice. Past performance is not indicative of future results.<br>
         Congressional trade disclosures are public record sourced from the STOCK Act.
     </p>
-
 </div>
 
 <script>
     const API_URL = 'https://congress-trader-api-production.up.railway.app';
 
-    // Tickers available on Stake/Pearler (matches main dashboard list)
     const STAKE_TICKERS = new Set([
         'AAPL','MSFT','GOOGL','GOOG','AMZN','META','NVDA','AMD','TSLA','NFLX',
         'INTC','QCOM','CRM','ORCL','CSCO','IBM','ADBE','PYPL','UBER','SHOP',
@@ -283,44 +375,52 @@
         'PLTR','COIN','SQ','SNAP','SPOT','RBLX'
     ]);
 
-    // Currency helpers (match main dashboard)
     let currentCurrency = localStorage.getItem('currency') || 'AUD';
     let usdToAud = 1.58;
 
     function formatAmount(v) {
-        if (!v && v !== 0) return '-';
-        if (currentCurrency === 'AUD') return 'A$' + Math.round(v * usdToAud).toLocaleString();
-        return '$' + Math.round(v).toLocaleString();
+        if (!v && v !== 0) return '—';
+        const val = currentCurrency === 'AUD' ? Math.round(v * usdToAud) : Math.round(v);
+        const prefix = currentCurrency === 'AUD' ? 'A$' : '$';
+        if (val >= 1000000) return prefix + (val / 1000000).toFixed(1) + 'M';
+        if (val >= 1000)    return prefix + (val / 1000).toFixed(0) + 'K';
+        return prefix + val.toLocaleString();
     }
 
     function formatDate(s) {
-        if (!s) return '-';
+        if (!s) return '—';
         const d = new Date(s + 'T00:00:00');
         return currentCurrency === 'AUD' ? d.toLocaleDateString('en-AU') : d.toLocaleDateString('en-US');
     }
 
-    // Get name from URL param
+    // Update nav auth button
+    (function() {
+        const email = localStorage.getItem('user_email');
+        if (email) {
+            const btn = document.getElementById('authNavBtn');
+            btn.textContent = '👤 ' + email.split('@')[0];
+        }
+    })();
+
     const params = new URLSearchParams(window.location.search);
     const rawName = params.get('name') || '';
 
     if (!rawName) {
         document.getElementById('loading').style.display = 'none';
-        document.getElementById('error').style.display = 'block';
-        document.getElementById('error').textContent = 'No politician specified. Go back and click a politician name.';
+        document.getElementById('errorMsg').style.display = 'block';
+        document.getElementById('errorMsg').textContent = 'No politician specified. Go back and click a politician name.';
     } else {
         loadProfile(rawName);
     }
 
     async function loadProfile(name) {
         try {
-            // Fetch stats + trade history in parallel
             const [statsRes, tradesRes, rateRes] = await Promise.allSettled([
                 fetch(`${API_URL}/politician/${encodeURIComponent(name)}`),
                 fetch(`${API_URL}/politician/${encodeURIComponent(name)}/trades`),
                 fetch('https://api.frankfurter.app/latest?from=USD&to=AUD')
             ]);
 
-            // Apply live FX rate if available
             if (rateRes.status === 'fulfilled' && rateRes.value.ok) {
                 const fx = await rateRes.value.json();
                 usdToAud = fx.rates.AUD;
@@ -339,8 +439,8 @@
 
         } catch (e) {
             document.getElementById('loading').style.display = 'none';
-            document.getElementById('error').style.display = 'block';
-            document.getElementById('error').textContent = 'Error loading profile: ' + e.message;
+            document.getElementById('errorMsg').style.display = 'block';
+            document.getElementById('errorMsg').textContent = 'Error loading profile: ' + e.message;
         }
     }
 
@@ -348,97 +448,85 @@
         document.getElementById('loading').style.display = 'none';
 
         const party = stats.party || '';
-        const initials = stats.politician.split(' ').map(w => w[0]).filter(Boolean).slice(0,2).join('');
+        const initials = stats.politician.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('');
         const avatarClass = party === 'D' ? 'profile-avatar--dem' : party === 'R' ? 'profile-avatar--rep' : 'profile-avatar--ind';
-        const badgeClass = party === 'D' ? 'badge-dem' : party === 'R' ? 'badge-rep' : 'badge-ind';
-        const partyLabel = party === 'D' ? 'Democrat' : party === 'R' ? 'Republican' : party || 'Independent';
+        const badgeClass  = party === 'D' ? 'badge-dem' : party === 'R' ? 'badge-rep' : 'badge-ind';
+        const partyLabel  = party === 'D' ? 'Democrat' : party === 'R' ? 'Republican' : party || 'Independent';
 
-        // Avatar
         const avatar = document.getElementById('avatar');
         avatar.textContent = initials;
         avatar.className = `profile-avatar ${avatarClass}`;
 
-        // Name & badges
         document.getElementById('profileName').textContent = stats.politician;
         document.title = `${stats.politician} — Congressional Trading Intelligence`;
-        const badgesEl = document.getElementById('profileBadges');
-        badgesEl.innerHTML = `
+
+        document.getElementById('profileBadges').innerHTML = `
             <span class="badge ${badgeClass}">${partyLabel}</span>
             ${stats.chamber ? `<span class="badge badge-chamber">${stats.chamber}</span>` : ''}
         `;
         if (stats.state) document.getElementById('profileState').textContent = stats.state;
 
-        // Signal score
         loadSignalScore(stats.politician);
 
-        // Stats cards
         const buyRatio = stats.total_trades > 0
-            ? Math.round((stats.purchases / stats.total_trades) * 100)
-            : 0;
-        const topTicker = stats.tickers && stats.tickers.length > 0 ? stats.tickers[0] : '-';
+            ? Math.round((stats.purchases / stats.total_trades) * 100) : 0;
 
         document.getElementById('statsGrid').innerHTML = `
-            <div class="stat-card">
+            <div class="stat-card glass">
                 <div class="stat-card__value">${stats.total_trades.toLocaleString()}</div>
                 <div class="stat-card__label">Total Trades</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card glass">
                 <div class="stat-card__value">${stats.purchases.toLocaleString()}</div>
                 <div class="stat-card__label">Purchases</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card glass">
                 <div class="stat-card__value">${stats.sales.toLocaleString()}</div>
                 <div class="stat-card__label">Sales</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card glass">
                 <div class="stat-card__value">${buyRatio}%</div>
                 <div class="stat-card__label">Buy Ratio</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card glass">
                 <div class="stat-card__value">${stats.unique_tickers}</div>
                 <div class="stat-card__label">Unique Stocks</div>
             </div>
         `;
 
-        // Ticker chips (top 15)
         const topTickers = (stats.tickers || []).slice(0, 15);
         document.getElementById('tickerChips').innerHTML = topTickers.map(t =>
-            `<span class="ticker-chip ${STAKE_TICKERS.has(t) ? 'ticker-chip--stake' : ''}" title="${STAKE_TICKERS.has(t) ? '✅ Available on Stake/Pearler' : '❌ Not on Stake/Pearler'}">${t}</span>`
+            `<span class="ticker-chip ${STAKE_TICKERS.has(t) ? 'ticker-chip--stake' : ''}"
+                   title="${STAKE_TICKERS.has(t) ? '✅ Available on Stake/Pearler' : '❌ Not on Stake/Pearler'}">${t}</span>`
         ).join('');
 
-        // Trades table (recent 20)
         const recentTrades = allTrades.slice(0, 20);
-        const tbody = document.getElementById('tradesBody');
-        tbody.innerHTML = recentTrades.map(t => {
+        document.getElementById('tradesBody').innerHTML = recentTrades.map(t => {
             const isPurchase = t.trade_type === 'Purchase';
-            const rowClass = isPurchase ? 'row--purchase' : 'row--sale';
-            const badgeCls = isPurchase ? 'badge-purchase' : 'badge-sale';
+            const rowClass   = isPurchase ? 'row--purchase' : 'row--sale';
+            const badgeCls   = isPurchase ? 'badge-purchase' : 'badge-sale';
             const stakeBadge = STAKE_TICKERS.has(t.ticker)
-                ? '<span class="stake-badge" title="Available on Stake/Pearler">✅</span>'
-                : '';
-            const amtLow = formatAmount(t.amount_low);
-            const amtHigh = formatAmount(t.amount_high);
-            const lagDays = t.disclosure_date && t.trade_date
-                ? Math.round((new Date(t.disclosure_date) - new Date(t.trade_date)) / 86400000)
-                : null;
-            const lagText = lagDays !== null ? `${lagDays}d lag` : '-';
+                ? '<span class="stake-badge" title="Available on Stake/Pearler">✅</span>' : '';
+            const amtLow     = formatAmount(t.amount_low);
+            const amtHigh    = formatAmount(t.amount_high);
+            const lagDays    = t.disclosure_date && t.trade_date
+                ? Math.round((new Date(t.disclosure_date) - new Date(t.trade_date)) / 86400000) : null;
+            const lagText    = lagDays !== null ? `${lagDays}d` : '—';
             return `<tr class="${rowClass}">
                 <td>${formatDate(t.trade_date)}</td>
                 <td><strong>${t.ticker}</strong>${stakeBadge}</td>
-                <td>${t.company_name || '-'}</td>
+                <td>${t.company_name || '—'}</td>
                 <td><span class="badge ${badgeCls}">${t.trade_type}</span></td>
                 <td class="amount">${amtLow} – ${amtHigh}</td>
-                <td style="font-size:12px;color:#a0aec0;">${lagText}</td>
+                <td class="lag-text">${lagText}</td>
             </tr>`;
         }).join('');
 
-        // Build chart
         buildChart(allTrades);
 
-        // Show all sections
         document.getElementById('profileCard').style.display = 'flex';
         document.getElementById('statsGrid').style.display = 'grid';
-        document.getElementById('tickerChips').parentElement.style.display = 'block';
+        document.getElementById('tickersSection').style.display = 'block';
         document.getElementById('tabsContainer').style.display = 'block';
     }
 
@@ -448,85 +536,89 @@
         const el = document.getElementById('profileSignal');
 
         if (!isPaid) {
-            el.innerHTML = `<div class="locked" onclick="alert('Upgrade to Insider to unlock Historical Pattern Analysis')" title="Upgrade to unlock">🔒</div><div class="stars-label">Pattern Score</div>`;
+            el.innerHTML = `<span class="locked" onclick="window.location.href='pricing.html'" title="Upgrade to Insider to unlock">🔒</span><div class="stars-label">Pattern Score</div>`;
             return;
         }
 
         try {
-            const res = await fetch(`${API_URL}/politician/${encodeURIComponent(name)}/signal-score`);
+            const res = await fetch(`${API_URL}/signal-scores`);
             if (!res.ok) return;
-            const data = await res.json();
+            const scores = await res.json();
+            const data = scores.find(s => s.member_name.toLowerCase() === name.toLowerCase());
+            if (!data) return;
             const score = data.signal_score || 1;
             const stars = '★'.repeat(score) + '☆'.repeat(5 - score);
             const lag = data.avg_disclosure_lag_days != null ? `${data.avg_disclosure_lag_days}d avg lag` : '';
             el.innerHTML = `
-                <div class="stars" title="${data.trade_count} trades. ${lag}. Factual information only.">${stars}</div>
+                <div class="stars" title="${data.trade_count} trades. ${lag}. Factual info only.">${stars}</div>
                 <div class="stars-label">Pattern Score</div>
             `;
-        } catch (e) { /* non-critical */ }
+        } catch { /* non-critical */ }
     }
 
     function buildChart(trades) {
-        // Group by year-month, count buys vs sells
         const months = {};
         trades.forEach(t => {
             if (!t.trade_date) return;
-            const ym = t.trade_date.slice(0, 7); // "2024-03"
+            const ym = t.trade_date.slice(0, 7);
             if (!months[ym]) months[ym] = { buys: 0, sells: 0 };
             if (t.trade_type === 'Purchase') months[ym].buys++;
             else months[ym].sells++;
         });
 
-        const labels = Object.keys(months).sort().slice(-24); // last 24 months
-        const buys = labels.map(m => months[m].buys);
-        const sells = labels.map(m => months[m].sells);
+        const labels = Object.keys(months).sort().slice(-24);
+        const buys   = labels.map(m => months[m].buys);
+        const sells  = labels.map(m => months[m].sells);
 
         new Chart(document.getElementById('activityChart'), {
             type: 'bar',
             data: {
                 labels: labels.map(l => {
                     const [y, m] = l.split('-');
-                    return `${new Date(y, m-1).toLocaleString('default', {month:'short'})} ${y.slice(2)}`;
+                    return `${new Date(y, m - 1).toLocaleString('default', { month: 'short' })} ${y.slice(2)}`;
                 }),
                 datasets: [
-                    {
-                        label: 'Purchases',
-                        data: buys,
-                        backgroundColor: 'rgba(16,185,129,0.7)',
-                        borderRadius: 3
-                    },
-                    {
-                        label: 'Sales',
-                        data: sells,
-                        backgroundColor: 'rgba(239,68,68,0.65)',
-                        borderRadius: 3
-                    }
+                    { label: 'Purchases', data: buys,  backgroundColor: 'rgba(16,185,129,0.7)',  borderRadius: 4 },
+                    { label: 'Sales',     data: sells, backgroundColor: 'rgba(239,68,68,0.65)', borderRadius: 4 }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: 'top' },
+                    legend: {
+                        position: 'top',
+                        labels: { color: 'rgba(255,255,255,0.6)', font: { size: 12 } }
+                    },
                     tooltip: {
-                        callbacks: {
-                            footer: () => 'Factual information only — not financial advice'
-                        }
+                        backgroundColor: 'rgba(15,12,41,0.95)',
+                        titleColor: '#fff',
+                        bodyColor: 'rgba(255,255,255,0.7)',
+                        borderColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 1,
+                        callbacks: { footer: () => 'Factual information only — not financial advice' }
                     }
                 },
                 scales: {
-                    x: { stacked: false, grid: { display: false } },
-                    y: { beginAtZero: true, ticks: { precision: 0 } }
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: 'rgba(255,255,255,0.35)', font: { size: 11 } }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255,255,255,0.06)' },
+                        ticks: { color: 'rgba(255,255,255,0.35)', precision: 0 }
+                    }
                 }
             }
         });
     }
 
-    function switchTab(tab) {
+    function switchTab(tab, e) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-btn--active'));
         document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('tab-panel--active'));
         document.getElementById(`tab-${tab}`).classList.add('tab-panel--active');
-        event.target.classList.add('tab-btn--active');
+        e.target.classList.add('tab-btn--active');
     }
 </script>
 </body>

@@ -30,9 +30,17 @@ app = FastAPI(
 )
 
 # Enable CORS for frontend
+ALLOWED_ORIGINS = [
+    "https://calm-entremet-cf440f.netlify.app",  # current Netlify domain
+    "http://localhost:3000",
+    "http://localhost:5500",
+    "http://127.0.0.1:5500",
+    "http://localhost:8080",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://calm-entremet-cf440f.netlify.app"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

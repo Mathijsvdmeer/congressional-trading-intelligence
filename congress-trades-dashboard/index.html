@@ -617,7 +617,8 @@
             <label>Minimum Amount</label>
             <select id="minAmount" onchange="applyFilters()">
                 <option value="0">All Trades</option>
-                <option value="50000" selected>$50K+ Only ⭐</option>
+                <option value="15000" selected>$15K+ Only ⭐</option>
+                <option value="50000">$50K+ Only</option>
                 <option value="100000">$100K+ Only</option>
                 <option value="500000">$500K+ Only</option>
                 <option value="1000000">$1M+ Only</option>
@@ -716,7 +717,7 @@
     // High-profile politicians (30 pts bonus for impact score)
     const HIGH_PROFILE = new Set([
         'nancy pelosi', 'tommy tuberville', 'dan crenshaw',
-        'josh gottheimer', 'marjorie taylor greene', 'michael mccaul',
+        'josh gottheimer', 'marjorie taylor greene', 'michael t. mccaul',
         'paul pelosi', 'mark green', 'ro khanna', 'brian mast',
         'alan lowenthal', 'virginia foxx'
     ]);
@@ -1018,9 +1019,11 @@
 
         filteredTrades = allTrades.filter(t => {
             const amt = t.amount_low || 0;
+            // Normalize party for filter comparison (API returns 'Democratic'/'Republican' or 'D'/'R')
+            const tParty = t.party === 'Democratic' ? 'D' : t.party === 'Republican' ? 'R' : (t.party || '');
             if (ticker    && !t.ticker.includes(ticker))            return false;
             if (tradeType && t.trade_type !== tradeType)            return false;
-            if (party     && t.party !== party)                     return false;
+            if (party     && tParty !== party)                      return false;
             if (stakeOnly && !STAKE_TICKERS.has(t.ticker))         return false;
             if (amt < minAmount)                                    return false;
             return true;
@@ -1043,10 +1046,11 @@
             trades.forEach(t => { t._impactScore = calcImpactScore(t); });
 
             filteredTrades = trades.filter(t => {
-                const amt = t.amount_low || 0;
+                const amt    = t.amount_low || 0;
+                const tParty = t.party === 'Democratic' ? 'D' : t.party === 'Republican' ? 'R' : (t.party || '');
                 if (ticker    && !t.ticker.includes(ticker))     return false;
                 if (tradeType && t.trade_type !== tradeType)     return false;
-                if (party     && t.party !== party)              return false;
+                if (party     && tParty !== party)               return false;
                 if (stakeOnly && !STAKE_TICKERS.has(t.ticker))  return false;
                 if (amt < minAmount)                             return false;
                 return true;
@@ -1092,8 +1096,10 @@
             }
 
             const isPurchase = trade.trade_type === 'Purchase';
-            const partyBadge = trade.party === 'D' ? 'badge-democrat' : 'badge-republican';
-            const partyText  = trade.party === 'D' ? 'DEM' : trade.party === 'R' ? 'GOP' : (trade.party || '—');
+            // Normalize full party names to codes (API returns both 'D' and 'Democratic')
+            const partyCode  = trade.party === 'Democratic' ? 'D' : trade.party === 'Republican' ? 'R' : (trade.party || '');
+            const partyBadge = partyCode === 'D' ? 'badge-democrat' : 'badge-republican';
+            const partyText  = partyCode === 'D' ? 'DEM' : partyCode === 'R' ? 'GOP' : (partyCode || '—');
 
             const daysAgo = trade.trade_date
                 ? Math.floor((Date.now() - new Date(trade.trade_date + 'T00:00:00')) / 86400000)

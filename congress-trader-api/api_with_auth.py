@@ -154,14 +154,21 @@ async def get_trades(
     Free: 7-day delayed
     Insider/Elite: Real-time
     """
-    query = supabase.table("congressional_trades").select("*").order("trade_date", desc=True)
-
     # Apply delay for free users
     if not user or user["subscription_tier"] == "free":
         delay_date = (datetime.now() - timedelta(days=7)).date().isoformat()
-        query = query.lte("trade_date", delay_date)
+        # Sort by amount DESC for free tier — surfaces big historical trades (Pelosi $1M+)
+        # rather than the most recent tiny trades which are unimpressive
+        query = supabase.table("congressional_trades")\
+            .select("*")\
+            .lte("trade_date", delay_date)\
+            .order("amount_low", desc=True)
         delayed = True
     else:
+        # Paid users get real-time sorted by date (newest first)
+        query = supabase.table("congressional_trades")\
+            .select("*")\
+            .order("trade_date", desc=True)
         delayed = False
 
     result = query.limit(limit).range(offset, offset + limit - 1).execute()

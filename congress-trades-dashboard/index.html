@@ -1158,10 +1158,23 @@
             const token = params.get('access_token');
             if (token) {
                 localStorage.setItem('supabase_token', token);
-                // Clean up URL without reloading
                 history.replaceState(null, '', window.location.pathname);
             }
         }
+    })();
+
+    // If user signed up intending to upgrade, show a nudge banner
+    (function checkIntendedPlan() {
+        const plan  = localStorage.getItem('intended_plan');
+        const email = localStorage.getItem('user_email') || localStorage.getItem('supabase_token');
+        const tier  = localStorage.getItem('user_tier') || 'free';
+        if (!plan || !email || tier !== 'free') return;
+        const banner = document.createElement('div');
+        banner.style.cssText = 'display:flex;align-items:center;gap:12px;background:rgba(102,126,234,0.12);border:1px solid rgba(102,126,234,0.35);border-radius:12px;padding:12px 20px;margin-bottom:16px;font-size:13px;color:#a5b4fc;';
+        const planLabel = plan === 'elite' ? 'Elite (A$49/mo)' : 'Insider (A$19.99/mo)';
+        banner.innerHTML = `<span>⭐</span><span>You selected <strong>${planLabel}</strong>. Payment setup coming shortly — <a href="pricing.html" style="color:#a5b4fc;font-weight:700;text-decoration:underline;">view plan details →</a></span><button onclick="this.parentElement.remove();localStorage.removeItem('intended_plan');" style="margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:18px;line-height:1;">×</button>`;
+        const statsEl = document.querySelector('.stats');
+        if (statsEl) statsEl.parentNode.insertBefore(banner, statsEl);
     })();
 
     // Initial auth UI from localStorage (instant, no network)

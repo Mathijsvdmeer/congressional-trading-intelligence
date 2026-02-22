@@ -31,7 +31,8 @@ app = FastAPI(
 
 # Enable CORS for frontend
 ALLOWED_ORIGINS = [
-    "https://calm-entremet-cf440f.netlify.app",  # current Netlify domain
+    "https://astounding-custard-510d0d.netlify.app",  # current Netlify domain
+    "https://calm-entremet-cf440f.netlify.app",       # old Netlify domain (keep for safety)
     "http://localhost:3000",
     "http://localhost:5500",
     "http://127.0.0.1:5500",

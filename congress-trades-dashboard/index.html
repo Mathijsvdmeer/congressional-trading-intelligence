@@ -970,7 +970,7 @@
     /* ═══════════════════════════════════════════════
        LOAD TRADES
     ═══════════════════════════════════════════════ */
-    async function loadTrades() {
+    async function loadTrades(attempt = 1) {
         try {
             const r = await fetch(`${API_URL}/trades?limit=2000`);
             if (!r.ok) throw new Error('Failed to load trades');
@@ -986,6 +986,14 @@
 
             applyFilters();
         } catch (err) {
+            // Retry once on network failure (handles Railway cold-start)
+            if (attempt === 1 && err.message === 'Failed to fetch') {
+                const el = document.getElementById('errorMsg');
+                el.style.display = 'block';
+                el.textContent = 'Connecting to server… retrying';
+                setTimeout(() => loadTrades(2), 4000);
+                return;
+            }
             document.getElementById('loading').style.display = 'none';
             const el = document.getElementById('errorMsg');
             el.style.display = 'block';

@@ -110,15 +110,24 @@ async def get_stats(user: Optional[Dict] = Depends(get_optional_user)):
     Free users: Basic stats only
     Paid users: Enhanced stats with real-time data
     """
-    # Basic stats for everyone
+    # Basic stats for everyone — use count="exact" with head=True to avoid fetching rows
     total_result = supabase.table("congressional_trades").select("id", count="exact").execute()
     total_trades = total_result.count
 
-    politicians_result = supabase.table("congressional_trades").select("member_name").execute()
-    unique_politicians = len(set([t["member_name"] for t in politicians_result.data]))
+    # Use SQL via RPC for efficient distinct counts
+    try:
+        pol_result = supabase.rpc("count_distinct_politicians").execute()
+        unique_politicians = pol_result.data or 0
+    except Exception:
+        pol_result = supabase.table("congressional_trades").select("member_name").execute()
+        unique_politicians = len(set(t["member_name"] for t in pol_result.data))
 
-    tickers_result = supabase.table("congressional_trades").select("ticker").execute()
-    unique_tickers = len(set([t["ticker"] for t in tickers_result.data]))
+    try:
+        tick_result = supabase.rpc("count_distinct_tickers").execute()
+        unique_tickers = tick_result.data or 0
+    except Exception:
+        tick_result = supabase.table("congressional_trades").select("ticker").execute()
+        unique_tickers = len(set(t["ticker"] for t in tick_result.data))
 
     stats = {
         "total_trades": total_trades,

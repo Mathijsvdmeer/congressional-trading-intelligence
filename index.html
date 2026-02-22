@@ -277,7 +277,7 @@
         let allTrades = [];
         let filteredTrades = [];
 
-        async function loadTrades() {
+        async function loadTrades(attempt = 1) {
             try {
                 const response = await fetch(`${API_URL}/trades`);
                 if (!response.ok) throw new Error('Failed to load trades');
@@ -295,6 +295,13 @@
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('tradesTable').style.display = 'table';
             } catch (error) {
+                // Retry once on network failure (handles Railway cold-start)
+                if (attempt === 1 && error.message === 'Failed to fetch') {
+                    document.getElementById('error').style.display = 'block';
+                    document.getElementById('error').textContent = 'Connecting to server… retrying';
+                    setTimeout(() => loadTrades(2), 4000);
+                    return;
+                }
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('error').style.display = 'block';
                 document.getElementById('error').textContent = 'Error loading trades: ' + error.message;

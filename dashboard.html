@@ -282,7 +282,8 @@
                 const response = await fetch(`${API_URL}/trades`);
                 if (!response.ok) throw new Error('Failed to load trades');
 
-                allTrades = await response.json();
+                const payload = await response.json();
+                allTrades = Array.isArray(payload) ? payload : (payload.trades || []);
                 filteredTrades = [...allTrades];
 
                 // Sort by date (most recent first)

@@ -763,9 +763,11 @@
             }
             if (!r.ok) return;
             const data = await r.json();
-            const tier = data.user?.subscription_tier || 'free';
+            const tier  = data.user?.subscription_tier || 'free';
+            const email = data.user?.email;
             userTier = tier;
             localStorage.setItem('user_tier', tier);
+            if (email) localStorage.setItem('user_email', email); // fill in if missing (e.g. post email-verify)
             updateAuthUI();
             renderTrades(); // re-render with correct tier
         } catch { /* non-critical */ }

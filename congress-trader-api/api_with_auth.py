@@ -162,7 +162,7 @@ async def get_trades(
         query = supabase.table("congressional_trades")\
             .select("*")\
             .lte("trade_date", delay_date)\
-            .order("amount_low", desc=True)
+            .order("amount_low", desc=True, nullsfirst=False)
         delayed = True
     else:
         # Paid users get real-time sorted by date (newest first)

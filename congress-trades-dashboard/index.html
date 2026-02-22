@@ -563,7 +563,9 @@
             </div>
             <div class="header__actions">
                 <a href="pricing.html" class="btn btn-ghost">💎 Pricing</a>
+                <a href="pricing.html#insider" id="upgradeBtn" style="display:none;" class="btn btn-primary">⭐ Upgrade to Insider</a>
                 <a href="auth.html" id="authBtn" class="btn btn-primary">Login / Sign Up</a>
+                <button id="signOutBtn" onclick="signOut()" style="display:none;" class="btn btn-ghost" title="Sign out">↩ Sign Out</button>
                 <div>
                     <div class="currency-toggle">
                         <button id="btnAUD" class="active" onclick="setCurrency('AUD')">🇦🇺 AUD</button>
@@ -574,6 +576,12 @@
             </div>
         </div>
     </header>
+
+    <!-- ═══ DATA DELAY NOTICE (free tier only) ═══ -->
+    <div id="delayNotice" style="display:none; align-items:center; gap:12px; background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.25); border-radius:12px; padding:12px 20px; margin-bottom:16px; font-size:13px; color:#fbbf24;">
+        <span>⏱</span>
+        <span><strong>7-day delayed data.</strong> You're on the free tier — trades are shown 7 days after disclosure. <a href="pricing.html" style="color:#fbbf24; font-weight:700; text-decoration:underline;">Upgrade to Insider for real-time →</a></span>
+    </div>
 
     <!-- ═══ STATS ═══ -->
     <div class="stats">
@@ -590,8 +598,8 @@
             <div class="stat-label">Stocks Traded</div>
         </div>
         <div class="stat-card">
-            <div class="stat-value" id="recentTrades">—</div>
-            <div class="stat-label">Last 30 Days</div>
+            <div class="stat-value" id="recentTrades">Daily</div>
+            <div class="stat-label" id="recentLabel">Refresh Rate</div>
         </div>
     </div>
 
@@ -677,17 +685,17 @@
             <div class="paywall-overlay" id="paywallOverlay" style="display:none;">
                 <div class="paywall-content">
                     <span class="lock-icon">🔒</span>
-                    <h3>See <span id="paywallCount">400,000+</span> More Trades</h3>
-                    <p class="paywall-sub" id="paywallSub">You're viewing 10 of the most impactful trades</p>
+                    <h3>Unlock <span id="paywallCount">1,990+</span> More Trades</h3>
+                    <p class="paywall-sub" id="paywallSub">You're viewing the 10 highest-impact trades. Real-time data starts at A$19.99/mo.</p>
                     <div class="paywall-features">
-                        <span>✓ 109K+ Trades</span>
+                        <span>✓ 109K+ Trades (2012–now)</span>
+                        <span>✓ Real-time, no 7-day delay</span>
                         <span>✓ Signal Score ⭐⭐⭐⭐⭐</span>
-                        <span>✓ Full History (2012–now)</span>
                         <span>✓ Email Alerts</span>
                         <span>✓ CSV Export</span>
                     </div>
-                    <a href="pricing.html" class="btn-upgrade">Upgrade to Insider — A$19.99/month</a>
-                    <p class="money-back">30-day money-back guarantee · Cancel anytime</p>
+                    <a href="pricing.html#insider" class="btn-upgrade">Start 7-Day Free Trial — A$19.99/mo</a>
+                    <p class="money-back">30-day money-back guarantee · Cancel anytime · No credit card for trial</p>
                 </div>
             </div>
         </div>
@@ -735,8 +743,68 @@
     let currentCurrency = localStorage.getItem('currency') || 'AUD';
     let usdToAud = 1.58;
 
-    const userTier = localStorage.getItem('user_tier') || 'free';
+    let userTier = localStorage.getItem('user_tier') || 'free';
     const FREE_LIMIT = 10;
+
+    // On load: if we have a stored token, verify it against the API and update tier
+    async function syncUserTier() {
+        const token = localStorage.getItem('supabase_token');
+        if (!token) return;
+        try {
+            const r = await fetch(`${API_URL}/account`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (r.status === 401) {
+                // Token expired — clear session
+                localStorage.removeItem('supabase_token');
+                localStorage.removeItem('user_email');
+                localStorage.removeItem('user_tier');
+                return;
+            }
+            if (!r.ok) return;
+            const data = await r.json();
+            const tier = data.user?.subscription_tier || 'free';
+            userTier = tier;
+            localStorage.setItem('user_tier', tier);
+            updateAuthUI();
+            renderTrades(); // re-render with correct tier
+        } catch { /* non-critical */ }
+    }
+
+    function updateAuthUI() {
+        const email = localStorage.getItem('user_email');
+        const btn = document.getElementById('authBtn');
+        const signOutBtn = document.getElementById('signOutBtn');
+        const upgradeBtn = document.getElementById('upgradeBtn');
+        if (email) {
+            const tierLabel = { free: 'Free', insider: 'Insider ⭐', elite: 'Elite 👑' }[userTier] || 'Free';
+            btn.textContent = `👤 ${email.split('@')[0]} · ${tierLabel}`;
+            btn.href = 'auth.html';
+            if (signOutBtn) signOutBtn.style.display = 'inline-flex';
+            // Show upgrade CTA only for free logged-in users
+            if (upgradeBtn) upgradeBtn.style.display = userTier === 'free' ? 'inline-flex' : 'none';
+        } else {
+            btn.textContent = 'Login / Sign Up';
+            btn.href = 'auth.html';
+            if (signOutBtn) signOutBtn.style.display = 'none';
+            if (upgradeBtn) upgradeBtn.style.display = 'none';
+        }
+        // Show/hide the data delay notice
+        const notice = document.getElementById('delayNotice');
+        if (notice) {
+            notice.style.display = userTier === 'free' ? 'flex' : 'none';
+        }
+    }
+
+    function signOut() {
+        localStorage.removeItem('user_email');
+        localStorage.removeItem('supabase_token');
+        localStorage.removeItem('user_tier');
+        localStorage.removeItem('intended_plan');
+        userTier = 'free';
+        updateAuthUI();
+        renderTrades();
+    }
 
     /* ═══════════════════════════════════════════════
        IMPACT SCORE
@@ -888,7 +956,11 @@
             document.getElementById('totalTrades').textContent      = (s.total_trades || 0).toLocaleString();
             document.getElementById('uniquePoliticians').textContent = (s.unique_politicians || 0).toLocaleString();
             document.getElementById('uniqueTickers').textContent     = (s.unique_tickers || 0).toLocaleString();
-            document.getElementById('recentTrades').textContent     = (s.recent_trades || s.recent_trades_30d || 0).toLocaleString();
+            if (s.recent_trades_30d) {
+                document.getElementById('recentTrades').textContent = s.recent_trades_30d.toLocaleString();
+                document.getElementById('recentLabel').textContent  = 'Trades (30 Days)';
+            }
+            // else: stays "Daily / Refresh Rate" — always looks populated
         } catch { /* fail silently */ }
     }
 
@@ -1061,7 +1133,7 @@
             document.getElementById('paywallCount').textContent =
                 (total - FREE_LIMIT).toLocaleString() + '+';
             document.getElementById('paywallSub').textContent =
-                `You're viewing ${FREE_LIMIT} of ${total.toLocaleString()} congressional trades`;
+                `You're viewing the ${FREE_LIMIT} highest-impact trades of ${total.toLocaleString()} available. Real-time data starts at A$19.99/mo.`;
         } else {
             overlay.style.display = 'none';
         }
@@ -1078,21 +1150,28 @@
     document.getElementById('searchPolitician').addEventListener('input', applyFilters);
     document.getElementById('searchTicker').addEventListener('input', applyFilters);
 
-    // Show login or account link
-    (function updateAuthBtn() {
-        const email = localStorage.getItem('user_email');
-        if (email) {
-            const btn = document.getElementById('authBtn');
-            btn.textContent = '👤 My Account';
-            btn.href = 'auth.html';
+    // Handle Supabase email-verification redirect (token arrives in URL hash)
+    (function extractHashSession() {
+        const hash = window.location.hash;
+        if (hash && hash.includes('access_token')) {
+            const params = new URLSearchParams(hash.replace('#', '?').replace('#', '&'));
+            const token = params.get('access_token');
+            if (token) {
+                localStorage.setItem('supabase_token', token);
+                // Clean up URL without reloading
+                history.replaceState(null, '', window.location.pathname);
+            }
         }
     })();
 
-    // Boot: load everything in parallel
+    // Initial auth UI from localStorage (instant, no network)
+    updateAuthUI();
+
+    // Boot: load everything in parallel, then verify session in background
     loadExchangeRate();
     loadStats();
     loadSignalScores();
-    loadTrades();
+    loadTrades().then(() => syncUserTier()); // sync tier after trades load so re-render is correct
 </script>
 </body>
 </html>

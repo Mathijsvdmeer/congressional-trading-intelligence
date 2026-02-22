@@ -364,11 +364,14 @@
         // =====================================================
         // SUPABASE CONFIGURATION
         // =====================================================
-        // TODO: Replace with your actual Supabase credentials
-        const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE'
-        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE'
+        const SUPABASE_URL = 'https://ujlnghtjnwnjilalazsx.supabase.co'
+        const SUPABASE_ANON_KEY = 'sb_publishable_MCnaCJcpsIGHtcK_wJs_6A_fQwKkEYL'
 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+        // Read plan intent from URL (?plan=insider or ?plan=elite)
+        const intendedPlan = new URLSearchParams(window.location.search).get('plan')
+        if (intendedPlan) localStorage.setItem('intended_plan', intendedPlan)
 
         // =====================================================
         // TAB SWITCHING
@@ -421,11 +424,16 @@
 
                 if (error) throw error
 
+                // Persist session info for index.html to pick up
+                if (data.session) {
+                    localStorage.setItem('user_email', data.session.user.email)
+                    localStorage.setItem('supabase_token', data.session.access_token)
+                }
+
                 showAlert('Login successful! Redirecting...', 'success')
 
-                // Redirect to dashboard after 1 second
                 setTimeout(() => {
-                    window.location.href = '/dashboard.html'
+                    window.location.href = 'index.html'
                 }, 1000)
 
             } catch (error) {
@@ -460,13 +468,13 @@
                     email: email,
                     password: password,
                     options: {
-                        emailRedirectTo: window.location.origin + '/dashboard.html'
+                        emailRedirectTo: window.location.origin + '/index.html'
                     }
                 })
 
                 if (error) throw error
 
-                showAlert('Account created! Please check your email to verify your account.', 'success')
+                showAlert('Account created! Check your email to verify, then log in.', 'success')
 
                 // Clear form
                 document.getElementById('signup-email').value = ''
@@ -489,7 +497,7 @@
                 const { data, error } = await supabase.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
-                        redirectTo: window.location.origin + '/dashboard.html'
+                        redirectTo: window.location.origin + '/index.html'
                     }
                 })
 
@@ -509,7 +517,7 @@
 
             try {
                 const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                    redirectTo: window.location.origin + '/reset-password.html'
+                    redirectTo: window.location.origin + '/index.html'
                 })
 
                 if (error) throw error
@@ -527,8 +535,10 @@
             const { data: { session } } = await supabase.auth.getSession()
 
             if (session) {
-                // User is already logged in - redirect to dashboard
-                window.location.href = '/dashboard.html'
+                // Persist session for other pages
+                localStorage.setItem('user_email', session.user.email)
+                localStorage.setItem('supabase_token', session.access_token)
+                window.location.href = 'index.html'
             }
         }
 
